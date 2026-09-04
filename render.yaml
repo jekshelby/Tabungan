@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: catatuang-app
+    env: python
+    buildCommand: apt-get update && apt-get install -y tesseract-ocr tesseract-ocr-ind && pip install -r requirements.txt
+    startCommand: gunicorn app:app
