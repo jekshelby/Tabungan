@@ -1,6 +1,7 @@
-from flask import Flask, render_template, request, redirect, url_for, send_from_directory
+from flask import Flask, render_template, request, redirect, url_for, send_from_directory, jsonify
 from features.dashboard import get_ringkasan_keuangan
 from features.pencatatan import get_kategori_transaksi, simpan_transaksi_baru
+from features.ocr import ekstraksi_total_struk
 
 app = Flask(__name__)
 
@@ -27,6 +28,21 @@ def tambah_transaksi():
     # Jika akses biasa (GET)
     kategori = get_kategori_transaksi()
     return render_template('pencatatan.html', kategori=kategori)
+
+@app.route('/api/scan-ocr', methods=['POST'])
+def api_scan_ocr():
+    if 'file' not in request.files:
+        return jsonify({'success': False, 'message': 'Tidak ada file diunggah'}), 400
+        
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({'success': False, 'message': 'File kosong'}), 400
+
+    nominal = ekstraksi_total_struk(file)
+    return jsonify({
+        'success': True,
+        'nominal': nominal
+    })
 
 # Tambahkan ini di app.py
 @app.route('/scan')
