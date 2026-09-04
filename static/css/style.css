@@ -1,0 +1,302 @@
+/* Reset & Pengaturan Frame HP */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+body {
+    background-color: #121212; /* Latar belakang gelap untuk simulasi di PC */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+/* App Canvas (Membuat frame mirip layar HP 1080x1920) */
+.mobile-canvas {
+    width: 100%;
+    max-width: 430px; /* Lebar standar tampilan layar HP modern */
+    height: 100vh;
+    max-height: 932px; /* Tinggi proporsional rasio 9:16 di desktop */
+    background-color: #f5f5f7;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+}
+
+/* Header Aplikasi (Bagian Atas) */
+.app-header {
+    background-color: #ffffff;
+    border-bottom: 1px solid #e5e5e5;
+    padding: 16px;
+    text-align: center;
+}
+
+.app-header h2 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+}
+
+/* Konten Utama (Scrollable) */
+.app-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    padding-bottom: 80px; /* Ruang agar tidak tertutup bottom bar */
+}
+
+/* Navigasi Bawah (Bottom Navigation Bar) */
+.bottom-nav {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 65px;
+    background-color: #ffffff;
+    border-top: 1px solid #e5e5e5;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    z-index: 100;
+}
+
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    color: #8e8e93;
+    font-size: 0.75rem;
+    font-weight: 500;
+    gap: 4px;
+    flex: 1;
+}
+
+.nav-item.active {
+    color: #000000;
+    font-weight: 600;
+}
+
+.nav-icon {
+    font-size: 1.15rem; /* Ukuran ikon pas untuk bottom bar */
+    line-height: 1;
+}
+
+/* Grid Dashboard */
+.dashboard-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.card {
+    background: #ffffff;
+    border: 1px solid #e5e5e5;
+    padding: 16px;
+    border-radius: 14px;
+}
+
+.card.saldo {
+    background-color: #000000;
+    color: #ffffff;
+    border: none;
+}
+
+.card small {
+    font-size: 0.75rem;
+    color: #6e6e73;
+    text-transform: uppercase;
+}
+
+.card.saldo small {
+    color: #a1a1a6;
+}
+
+.card h3 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-top: 4px;
+}
+
+.card h4 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-top: 4px;
+}
+
+.pemasukan h4 { color: #2e7d32; }
+.pengeluaran h4 { color: #c62828; }
+
+/* Form Component */
+.form-card {
+    background: #ffffff;
+    border: 1px solid #e5e5e5;
+    border-radius: 14px;
+    padding: 20px;
+}
+
+.form-group {
+    margin-bottom: 14px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #d1d1d6;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    background-color: #fafafa;
+}
+
+.btn-submit {
+    width: 100%;
+    padding: 14px;
+    background-color: #000000;
+    color: #ffffff;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin-top: 8px;
+}
+
+/* Riwayat List */
+.riwayat-section {
+    background: #ffffff;
+    border: 1px solid #e5e5e5;
+    border-radius: 14px;
+    padding: 16px;
+}
+
+.riwayat-list {
+    list-style: none;
+}
+
+.item-transaksi {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.item-transaksi:last-child {
+    border-bottom: none;
+}
+
+/* Responsif Layar HP Nyata (Layar penuh di HP) */
+@media (max-width: 480px) {
+    body {
+        background-color: #f5f5f7;
+    }
+    .mobile-canvas {
+        max-width: 100%;
+        height: 100vh;
+        max-height: 100vh;
+        box-shadow: none;
+    }
+}
+
+/* Styling Tambahan untuk Kartu Saldo & Privasi */
+.card-header-saldo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.btn-toggle-privacy {
+    background: transparent;
+    border: none;
+    color: #a1a1a6;
+    cursor: pointer;
+    font-size: 1.2rem;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    transition: color 0.2s ease;
+}
+
+.btn-toggle-privacy:hover {
+    color: #ffffff;
+}
+
+/* Navigasi Bawah dengan Indicator Bulat (Pill Shape) */
+.bottom-nav {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 70px;
+    background-color: #ffffff;
+    border-top: 1px solid #e5e5e5;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    z-index: 100;
+    padding: 0 8px;
+}
+
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    color: #8e8e93;
+    font-size: 0.75rem;
+    font-weight: 500;
+    gap: 2px;
+    padding: 8px 16px;
+    border-radius: 20px; /* Membuat efek kapsul/bulat */
+    transition: all 0.25s ease;
+}
+
+/* Tampilan Saat Menu Sedang Aktif / Dipilih */
+.nav-item.active {
+    color: #000000;
+    background-color: #f0f0f2; /* Warna latar belakang bulat/kapsul mengelilingi icon & teks */
+    font-weight: 600;
+}
+
+.nav-icon {
+    font-size: 1.25rem;
+    line-height: 1;
+}
+
+/* Dashboard Grid */
+.dashboard-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+/* Pembungkus Dua Kartu Berdampingan (Kiri & Kanan) */
+.sub-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Membagi layar 50% kiri & 50% kanan */
+    gap: 12px;
+}
+
+/* Penyesuaian Ukuran Font Kartu Kiri-Kanan */
+.sub-cards .card {
+    padding: 12px;
+}
+
+.sub-cards .card h4 {
+    font-size: 1rem; /* Ukuran tulisan disesuaikan agar pas di layar HP */
+    margin-top: 2px;
+}

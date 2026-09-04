@@ -1,0 +1,203 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="form-card" style="text-align: center;">
+    <h3 style="margin-bottom: 8px;">Scan Struk Belanja</h3>
+    <p style="color: #6e6e73; font-size: 0.85rem; margin-bottom: 20px;">
+        Pilih metode untuk mendeteksi total belanjaan secara otomatis.
+    </p>
+
+    <!-- Tombol Mode Pilihan -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px;">
+        <button id="btnOpenCam" class="btn-submit" onclick="bukaWebcam()"
+            style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 16px 8px; cursor: pointer; background-color: #000000; color: #ffffff; margin-top: 0; border: none; border-radius: 10px;">
+            <i class="bi bi-camera-fill" style="font-size: 1.5rem; margin-bottom: 4px;"></i>
+            <span style="font-size: 0.85rem; font-weight: 600;">Open Cam</span>
+        </button>
+
+        <label for="galleryInput" class="btn-submit"
+            style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 16px 8px; cursor: pointer; background-color: #f0f0f2; color: #000000; border: 1px solid #d1d1d6; margin-top: 0; border-radius: 10px;">
+            <i class="bi bi-images" style="font-size: 1.5rem; margin-bottom: 4px;"></i>
+            <span style="font-size: 0.85rem; font-weight: 600;">Galeri / File</span>
+        </label>
+        <input type="file" id="galleryInput" accept="image/*" style="display: none;" onchange="prosesFileGaleri(event)">
+    </div>
+
+    <!-- Area Stream Webcam (Buka Kamera Langsung di Halaman) -->
+    <div id="webcamContainer" style="display: none; margin-top: 16px;">
+        <video id="webcamVideo" autoplay playsinline
+            style="width: 100%; max-height: 300px; border-radius: 10px; background-color: #000; object-fit: cover;"></video>
+        <button onclick="ambilGambarWebcam()" class="btn-submit btn-primary" style="margin-top: 10px; cursor: pointer;">
+            <i class="bi bi-camera"></i> Ambil Foto Struk
+        </button>
+    </div>
+
+    <!-- Canvas Tersembunyi untuk Capture Video -->
+    <canvas id="webcamCanvas" style="display: none;"></canvas>
+
+    <!-- Preview Gambar Struk -->
+    <div id="previewContainer" style="display: none; margin-top: 16px;">
+        <img id="imagePreview" src="" alt="Preview Struk"
+            style="max-width: 100%; border-radius: 10px; border: 1px solid #e5e5e5;">
+    </div>
+
+    <!-- Indicator Loading OCR -->
+    <div id="loadingOCR" style="display: none; margin-top: 20px;">
+        <div class="spinner"
+            style="display: inline-block; width: 24px; height: 24px; border: 3px solid #e5e5e5; border-top-color: #000; border-radius: 50%; animation: spin 1s linear infinite;">
+        </div>
+        <p style="font-size: 0.85rem; color: #6e6e73; margin-top: 8px;">Membaca teks dari struk...</p>
+    </div>
+
+    <!-- Hasil Deteksi OCR -->
+    <div id="hasilContainer"
+        style="display: none; margin-top: 20px; padding: 16px; background-color: #f9f9fb; border-radius: 10px; border: 1px solid #e5e5e5; text-align: left;">
+        <small style="color: #6e6e73; text-transform: uppercase; font-size: 0.75rem; font-weight: 600;">Total
+            Terdeteksi:</small>
+        <h2 id="textTotalNominal" style="color: #2e7d32; font-size: 1.8rem; margin: 4px 0 12px 0;">Rp 0</h2>
+
+        <button id="btnLanjutCatat" class="btn-submit btn-primary"
+            style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer;">
+            <i class="bi bi-arrow-right-circle-fill"></i> Gunakan Nominal Ini
+        </button>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+
+<style>
+    @keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+</style>
+
+<script>
+    let videoStream = null;
+
+    // Buka Kamera Laptop / HP secara live
+    async function bukaWebcam() {
+        const webcamContainer = document.getElementById('webcamContainer');
+        const webcamVideo = document.getElementById('webcamVideo');
+        document.getElementById('previewContainer').style.display = 'none';
+        document.getElementById('hasilContainer').style.display = 'none';
+
+        try {
+            videoStream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: 'environment' }
+            });
+            webcamVideo.srcObject = videoStream;
+            webcamContainer.style.display = 'block';
+        } catch (err) {
+            alert("Gagal mengakses kamera. Pastikan izin kamera telah diberikan di browser.");
+            console.error(err);
+        }
+    }
+
+    // Ambil screenshot dari aliran kamera video
+    function ambilGambarWebcam() {
+        const webcamVideo = document.getElementById('webcamVideo');
+        const canvas = document.getElementById('webcamCanvas');
+        const context = canvas.getContext('2d');
+
+        canvas.width = webcamVideo.videoWidth;
+        canvas.height = webcamVideo.videoHeight;
+        context.drawImage(webcamVideo, 0, 0, canvas.width, canvas.height);
+
+        // Matikan aliran kamera setelah gambar diambil
+        if (videoStream) {
+            videoStream.getTracks().forEach(track => track.stop());
+        }
+        document.getElementById('webcamContainer').style.display = 'none';
+
+        // Konversi canvas ke blob/image file
+        canvas.toBlob((blob) => {
+            jalankanOCR(blob);
+        }, 'image/jpeg');
+    }
+
+    // Memproses file yang dipilih melalui Galeri / Directory
+    function prosesFileGaleri(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        // Hentikan stream webcam jika sedang aktif
+        if (videoStream) {
+            videoStream.getTracks().forEach(track => track.stop());
+            document.getElementById('webcamContainer').style.display = 'none';
+        }
+
+        jalankanOCR(file);
+    }
+
+    // Eksekusi Tesseract.js OCR
+    async function jalankanOCR(imageSource) {
+        const previewContainer = document.getElementById('previewContainer');
+        const imagePreview = document.getElementById('imagePreview');
+        const loadingOCR = document.getElementById('loadingOCR');
+        const hasilContainer = document.getElementById('hasilContainer');
+
+        imagePreview.src = URL.createObjectURL(imageSource);
+        previewContainer.style.display = 'block';
+        loadingOCR.style.display = 'block';
+        hasilContainer.style.display = 'none';
+
+        try {
+            const worker = await Tesseract.createWorker('ind+eng');
+            const ret = await worker.recognize(imageSource);
+            await worker.terminate();
+
+            const teksHasil = ret.data.text;
+            const nominalTotal = ekstraksiNominalTotal(teksHasil);
+
+            document.getElementById('textTotalNominal').innerText = 'Rp ' + nominalTotal.toLocaleString('id-ID');
+            hasilContainer.style.display = 'block';
+
+            document.getElementById('btnLanjutCatat').onclick = function () {
+                window.location.href = `/tambah?nominal=${nominalTotal}`;
+            };
+
+        } catch (err) {
+            alert("Gagal membaca gambar struk. Coba ambil foto dengan lebih jelas.");
+            console.error(err);
+        } finally {
+            loadingOCR.style.display = 'none';
+        }
+    }
+
+    // Logika pemrosesan teks untuk mencari angka total
+    function ekstraksiNominalTotal(teks) {
+        const barisTeks = teks.toUpperCase().split('\n');
+        let nominalDitemukan = null;
+
+        for (let baris of barisTeks) {
+            if (baris.includes("TOTAL") || baris.includes("JUMLAH") || baris.includes("BAYAR") || baris.includes("RP")) {
+                const angkaList = baris.match(/\d+/g);
+                if (angkaList) {
+                    const gabungAngka = parseInt(angkaList.join(''));
+                    if (gabungAngka >= 500) {
+                        nominalDitemukan = gabungAngka;
+                    }
+                }
+            }
+        }
+
+        if (!nominalDitemukan) {
+            const semuaAngka = teks.match(/\b\d{4,8}\b/g);
+            if (semuaAngka) {
+                const daftarNominal = semuaAngka.map(n => parseInt(n)).filter(n => n >= 1000);
+                if (daftarNominal.length > 0) {
+                    nominalDitemukan = Math.max(...daftarNominal);
+                }
+            }
+        }
+
+        return nominalDitemukan || 0;
+    }
+</script>
+{% endblock %}

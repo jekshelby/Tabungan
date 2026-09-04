@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="dashboard-grid">
+    <!-- Kartu Saldo Utama -->
+    <div class="card saldo">
+        <div class="card-header-saldo">
+            <small>Sisa Saldo</small>
+            <!-- Tombol Toggle Privasi pakai Bootstrap Icon -->
+            <button id="toggleSaldoBtn" class="btn-toggle-privacy" onclick="togglePrivasiSaldo()"
+                title="Sembunyikan/Tampilkan Saldo">
+                <i id="eyeIcon" class="bi bi-eye-fill"></i>
+            </button>
+        </div>
+        <h3 id="saldoText" data-saldo="Rp {{ '{:,.0f}'.format(data.sisa_saldo) }}">
+            Rp {{ "{:,.0f}".format(data.sisa_saldo) }}
+        </h3>
+    </div>
+
+    <!-- Sub-Cards Berdampingan -->
+    <div class="sub-cards">
+        <div class="card pemasukan">
+            <small>Pemasukan</small>
+            <h4>Rp {{ "{:,.0f}".format(data.total_pemasukan) }}</h4>
+        </div>
+        <div class="card pengeluaran">
+            <small>Pengeluaran</small>
+            <h4>Rp {{ "{:,.0f}".format(data.total_pengeluaran) }}</h4>
+        </div>
+    </div>
+</div>
+
+<div class="riwayat-section">
+    <h3>Riwayat Transaksi</h3>
+    <ul class="riwayat-list">
+        {% for item in data.riwayat %}
+        <li class="item-transaksi {{ item.tipe }}">
+            <div>
+                <strong>{{ item.catatan }}</strong>
+                <small>{{ item.kategori }} • {{ item.tanggal }}</small>
+            </div>
+            <span class="nominal">
+                {% if item.tipe == 'pemasukan' %}+{% else %}-{% endif %}
+                Rp {{ "{:,.0f}".format(item.nominal) }}
+            </span>
+        </li>
+        {% else %}
+        <li style="text-align: center; color: #8e8e93; padding: 12px 0;">Belum ada data transaksi</li>
+        {% endfor %}
+    </ul>
+</div>
+
+<script>
+    function togglePrivasiSaldo() {
+        const saldoElement = document.getElementById('saldoText');
+        const eyeIcon = document.getElementById('eyeIcon');
+        const isHidden = localStorage.getItem('hideSaldo') === 'true';
+
+        if (isHidden) {
+            saldoElement.innerText = saldoElement.getAttribute('data-saldo');
+            eyeIcon.className = 'bi bi-eye-fill';
+            localStorage.setItem('hideSaldo', 'false');
+        } else {
+            saldoElement.innerText = 'Rp ****';
+            eyeIcon.className = 'bi bi-eye-slash';
+            localStorage.setItem('hideSaldo', 'true');
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const isHidden = localStorage.getItem('hideSaldo') === 'true';
+        if (isHidden) {
+            const saldoElement = document.getElementById('saldoText');
+            const eyeIcon = document.getElementById('eyeIcon');
+            saldoElement.innerText = 'Rp ****';
+            eyeIcon.className = 'bi bi-eye-slash';
+        }
+    });
+</script>
+{% endblock %}
