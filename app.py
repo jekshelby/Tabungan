@@ -41,5 +41,13 @@ def service_worker():
 def manifest():
     return send_from_directory('static', 'manifest.json', mimetype='application/json')
 
+@app.after_request
+def add_header(response):
+    # Mencegah browser menyimpan cache halaman dynamic HTML
+    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '-1'
+    return response
+
 if __name__ == '__main__':
     app.run(debug=True, port=5000)

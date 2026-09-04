@@ -1,40 +1,46 @@
-const CACHE_NAME = 'catatuang-v1';
-const urlsToCache = [
-    '/',
-    '/static/css/style.css',
-    'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css',
-    'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'
-];
+const CACHE_NAME = 'catatuang-v2';
 
 // Install Event
 self.addEventListener('install', (event) => {
-    event.waitUntil(
-        caches.open(CACHE_NAME).then((cache) => {
-            return cache.addAll(urlsToCache);
-        })
-    );
+  self.skipWaiting();
 });
 
-// Fetch Event (Melayani aset dari cache jika offline)
-self.addEventListener('fetch', (event) => {
-    event.respondWith(
-        caches.match(event.request).then((response) => {
-            return response || fetch(event.request);
-        })
-    );
-});
-
-// Activate Event (Pembersihan cache lama)
+// Activate Event (Hapus cache lama)
 self.addEventListener('activate', (event) => {
-    event.waitUntil(
-        caches.keys().then((cacheNames) => {
-            return Promise.all(
-                cacheNames.map((cache) => {
-                    if (cache !== CACHE_NAME) {
-                        return caches.delete(cache);
-                    }
-                })
-            );
+  event.waitUntil(
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map((cache) => {
+          if (cache !== CACHE_NAME) {
+            return caches.delete(cache);
+          }
         })
-    );
+      );
+    })
+  );
+  self.clients.claim();
+});
+
+// Fetch Event: Network First (Coba ke Server Dulu, Baru Cache)
+self.addEventListener('fetch', (event) => {
+  // Hanya proses HTTP/HTTPS request
+  if (!event.request.url.startsWith('http')) return;
+
+  event.respondWith(
+    fetch(event.request)
+      .then((networkResponse) => {
+        // Jika berhasil dapat data dari server, simpan salinannya ke cache
+        if (networkResponse && networkResponse.status === 200 && event.request.method === 'GET') {
+          const responseClone = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseClone);
+          });
+        }
+        return networkResponse;
+      })
+      .catch(() => {
+        // Jika offline / server gagal diakses, baru ambil dari cache
+        return caches.match(event.request);
+      })
+  );
 });
