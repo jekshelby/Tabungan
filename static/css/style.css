@@ -300,3 +300,22 @@ body {
     font-size: 1rem; /* Ukuran tulisan disesuaikan agar pas di layar HP */
     margin-top: 2px;
 }
+
+/* 1. Pastikan area konten memiliki ruang bawah setinggi Bottom Nav */
+.app-content {
+    padding-bottom: 80px; /* Sesuaikan dengan tinggi bottom nav kamu */
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* 2. Kunci Bottom Nav agar selalu menempel di bawah tanpa terdorong scroll */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 480px; /* Sesuaikan dengan max-width mobile canvas */
+    z-index: 1000;
+    background-color: #ffffff; /* Pastikan background solid */
+}

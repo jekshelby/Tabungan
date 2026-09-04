@@ -6,7 +6,7 @@
     <form action="/tambah" method="POST">
         <div class="form-group">
             <label>Tipe Transaksi</label>
-            <select name="tipe" required>
+            <select id="selectTipe" name="tipe" required onchange="updateKategoriOptions()">
                 <option value="pengeluaran">Pengeluaran</option>
                 <option value="pemasukan">Pemasukan</option>
             </select>
@@ -19,17 +19,8 @@
 
         <div class="form-group">
             <label>Kategori</label>
-            <select name="kategori" required>
-                <optgroup label="Pengeluaran">
-                    {% for kat in kategori.pengeluaran %}
-                    <option value="{{ kat }}">{{ kat }}</option>
-                    {% endfor %}
-                </optgroup>
-                <optgroup label="Pemasukan">
-                    {% for kat in kategori.pemasukan %}
-                    <option value="{{ kat }}">{{ kat }}</option>
-                    {% endfor %}
-                </optgroup>
+            <select id="selectKategori" name="kategori" required>
+                <!-- Opsi diisi otomatis via JavaScript -->
             </select>
         </div>
 
@@ -42,9 +33,29 @@
     </form>
 </div>
 
-<!-- Skrip Mengisi Nominal Otomatis Jika Dikirim dari Menu Scan -->
 <script>
+    // Membungkus sintaks Jinja2 dengan string agar tidak di-flag error oleh VS Code
+    const dataKategori = JSON.parse('{{ kategori | tojson | safe }}');
+
+    function updateKategoriOptions() {
+        const tipe = document.getElementById('selectTipe').value;
+        const selectKategori = document.getElementById('selectKategori');
+
+        selectKategori.innerHTML = '';
+
+        const opsiTersedia = dataKategori[tipe] || [];
+
+        opsiTersedia.forEach(kat => {
+            const option = document.createElement('option');
+            option.value = kat;
+            option.textContent = kat;
+            selectKategori.appendChild(option);
+        });
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
+        updateKategoriOptions();
+
         const urlParams = new URLSearchParams(window.location.search);
         const nominalOCR = urlParams.get('nominal');
 
