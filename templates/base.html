@@ -5,7 +5,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-    <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#000000">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -14,11 +13,9 @@
 
     <title>CatatUang Mobile</title>
 
-    <!-- CDN Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 
-    <!-- Register Service Worker -->
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
@@ -36,10 +33,12 @@
             <h2>CatatUang</h2>
         </header>
 
-        <main class="app-content">
+        <main class="app-content" {% if request.path=='/tambah' %}style="padding-bottom: 20px;" {% endif %}>
             {% block content %}{% endblock %}
         </main>
 
+        <!-- Hide Bottom Nav jika berada di halaman /tambah -->
+        {% if request.path != '/tambah' %}
         <nav class="bottom-nav">
             <a href="/" class="nav-item {% if request.path == '/' %}active{% endif %}">
                 <i class="bi bi-house-door-fill nav-icon"></i>
@@ -49,11 +48,12 @@
                 <i class="bi bi-qr-code-scan nav-icon"></i>
                 <span>Scan</span>
             </a>
-            <a href="/tambah" class="nav-item {% if request.path == '/tambah' %}active{% endif %}">
-                <i class="bi bi-plus-circle-fill nav-icon"></i>
-                <span>Catat</span>
+            <a href="/transaksi" class="nav-item {% if request.path == '/transaksi' %}active{% endif %}">
+                <i class="bi bi-receipt nav-icon"></i>
+                <span>Transaksi</span>
             </a>
         </nav>
+        {% endif %}
     </div>
 </body>
 

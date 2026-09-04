@@ -2,57 +2,69 @@
 
 {% block content %}
 <div class="form-card" style="text-align: center;">
-    <h3 style="margin-bottom: 8px;">Scan Struk Belanja</h3>
-    <p style="color: #6e6e73; font-size: 0.85rem; margin-bottom: 20px;">
+    <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--text-primary); margin-bottom: 6px;">
+        Scan Struk Belanja
+    </h3>
+    <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 20px; line-height: 1.4;">
         Pilih metode untuk mendeteksi total belanjaan secara otomatis.
     </p>
 
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px;">
-        <button id="btnOpenCam" class="btn-submit" onclick="bukaWebcam()"
-            style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 16px 8px; cursor: pointer; background-color: #000000; color: #ffffff; margin-top: 0; border: none; border-radius: 10px;">
-            <i class="bi bi-camera-fill" style="font-size: 1.5rem; margin-bottom: 4px;"></i>
-            <span style="font-size: 0.85rem; font-weight: 600;">Open Cam</span>
+    <!-- Pilihan Kamera / Galeri -->
+    <div class="scan-options" style="margin-bottom: 16px;">
+        <button id="btnOpenCam" class="btn-scan-option primary" onclick="bukaWebcam()">
+            <i class="bi bi-camera-fill" style="font-size: 1.5rem;"></i>
+            <span>Open Cam</span>
         </button>
 
-        <label for="galleryInput" class="btn-submit"
-            style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 16px 8px; cursor: pointer; background-color: #f0f0f2; color: #000000; border: 1px solid #d1d1d6; margin-top: 0; border-radius: 10px;">
-            <i class="bi bi-images" style="font-size: 1.5rem; margin-bottom: 4px;"></i>
-            <span style="font-size: 0.85rem; font-weight: 600;">Galeri / File</span>
+        <label for="galleryInput" class="btn-scan-option">
+            <i class="bi bi-images" style="font-size: 1.5rem; color: var(--text-primary);"></i>
+            <span>Galeri / File</span>
         </label>
         <input type="file" id="galleryInput" accept="image/*" style="display: none;" onchange="prosesFileGaleri(event)">
     </div>
 
+    <!-- Container Webcam Video -->
     <div id="webcamContainer" style="display: none; margin-top: 16px;">
         <video id="webcamVideo" autoplay playsinline
-            style="width: 100%; max-height: 300px; border-radius: 10px; background-color: #000; object-fit: cover;"></video>
-        <button onclick="ambilGambarWebcam()" class="btn-submit btn-primary" style="margin-top: 10px; cursor: pointer;">
+            style="width: 100%; max-height: 300px; border-radius: 12px; background-color: #000; object-fit: cover;"></video>
+        <button onclick="ambilGambarWebcam()" class="btn-submit" style="margin-top: 12px;">
             <i class="bi bi-camera"></i> Ambil Foto Struk
         </button>
     </div>
 
     <canvas id="webcamCanvas" style="display: none;"></canvas>
 
+    <!-- Preview Gambar Struk -->
     <div id="previewContainer" style="display: none; margin-top: 16px;">
         <img id="imagePreview" src="" alt="Preview Struk"
-            style="max-width: 100%; border-radius: 10px; border: 1px solid #e5e5e5;">
+            style="max-width: 100%; border-radius: 12px; border: 1px solid var(--border-color);">
     </div>
 
-    <div id="loadingOCR" style="display: none; margin-top: 20px;">
+    <!-- Loading OCR -->
+    <div id="loadingOCR" style="display: none; margin-top: 24px; padding: 12px;">
         <div class="spinner"
-            style="display: inline-block; width: 24px; height: 24px; border: 3px solid #e5e5e5; border-top-color: #000; border-radius: 50%; animation: spin 1s linear infinite;">
+            style="display: inline-block; width: 28px; height: 28px; border: 3px solid var(--border-color); border-top-color: var(--accent-dark); border-radius: 50%; animation: spin 0.8s linear infinite;">
         </div>
-        <p style="font-size: 0.85rem; color: #6e6e73; margin-top: 8px;">Menganalisis struk di server...</p>
+        <p style="font-size: 0.85rem; font-weight: 500; color: var(--text-secondary); margin-top: 10px;">
+            Menganalisis struk di server...
+        </p>
     </div>
 
+    <!-- Hasil Terdeteksi -->
     <div id="hasilContainer"
-        style="display: none; margin-top: 20px; padding: 16px; background-color: #f9f9fb; border-radius: 10px; border: 1px solid #e5e5e5; text-align: left;">
-        <small style="color: #6e6e73; text-transform: uppercase; font-size: 0.75rem; font-weight: 600;">Total
-            Terdeteksi:</small>
-        <h2 id="textTotalNominal" style="color: #2e7d32; font-size: 1.8rem; margin: 4px 0 12px 0;">Rp 0</h2>
+        style="display: none; margin-top: 20px; padding: 16px; background-color: #fafafa; border-radius: 14px; border: 1px solid var(--border-color); text-align: left;">
+        <small
+            style="color: var(--text-secondary); text-transform: uppercase; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.5px;">
+            Total Terdeteksi:
+        </small>
+        <h2 id="textTotalNominal"
+            style="color: var(--expense-color); font-size: 1.8rem; font-weight: 700; margin: 4px 0 16px 0; letter-spacing: -0.5px;">
+            Rp 0
+        </h2>
 
-        <button id="btnLanjutCatat" class="btn-submit btn-primary"
-            style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer;">
-            <i class="bi bi-arrow-right-circle-fill"></i> Gunakan Nominal Ini
+        <button id="btnLanjutCatat" class="btn-submit"
+            style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <i class="bi bi-arrow-right-circle-fill" style="font-size: 1.1rem;"></i> Gunakan Nominal Ini
         </button>
     </div>
 </div>
@@ -146,6 +158,7 @@
                 document.getElementById('textTotalNominal').innerText = 'Rp ' + nominalTotal.toLocaleString('id-ID');
                 hasilContainer.style.display = 'block';
 
+                // Arahkan langsung ke form pencatatan (/tambah) dengan query parameter nominal
                 document.getElementById('btnLanjutCatat').onclick = function () {
                     window.location.href = `/tambah?nominal=${nominalTotal}`;
                 };

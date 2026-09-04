@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, send_from_directory, jsonify
-from features.dashboard import get_ringkasan_keuangan
+from features.dashboard import get_ringkasan_keuangan, get_semua_riwayat
 from features.pencatatan import get_kategori_transaksi, simpan_transaksi_baru
 from features.ocr import ekstraksi_total_struk
 
@@ -13,21 +13,21 @@ def index():
 @app.route('/tambah', methods=['GET', 'POST'])
 def tambah_transaksi():
     if request.method == 'POST':
-        # Ambil data dari form HTML
         tipe = request.form.get('tipe')
         nominal = request.form.get('nominal')
         kategori = request.form.get('kategori')
         catatan = request.form.get('catatan')
 
-        # Simpan ke Neon PostgreSQL
         simpan_transaksi_baru(tipe, nominal, kategori, catatan)
-
-        # Redirect kembali ke Dashboard setelah berhasil
         return redirect(url_for('index'))
 
-    # Jika akses biasa (GET)
     kategori = get_kategori_transaksi()
     return render_template('pencatatan.html', kategori=kategori)
+
+@app.route('/transaksi')
+def transaksi():
+    riwayat_lengkap = get_semua_riwayat()
+    return render_template('transaksi.html', riwayat=riwayat_lengkap)
 
 @app.route('/api/scan-ocr', methods=['POST'])
 def api_scan_ocr():
@@ -44,7 +44,6 @@ def api_scan_ocr():
         'nominal': nominal
     })
 
-# Tambahkan ini di app.py
 @app.route('/scan')
 def scan_ocr():
     return render_template('scan.html')
@@ -59,7 +58,6 @@ def manifest():
 
 @app.after_request
 def add_header(response):
-    # Mencegah browser menyimpan cache halaman dynamic HTML
     response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0'
     response.headers['Pragma'] = 'no-cache'
     response.headers['Expires'] = '-1'
